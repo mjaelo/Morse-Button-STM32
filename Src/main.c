@@ -24,6 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usbd_cdc_if.h"
 #include <stdlib.h>
 #include <string.h>
 #include "logo.h"
@@ -144,9 +145,9 @@ uint8_t DataToSend[40]; // array for date to send
 uint8_t MessageCounter = 0; // how many messanges we send
 uint8_t MessageLength = 0; //lenght of message
 //Reciving
-uint8_t ReceivedData[40]; // ara
+uint8_t ReceivedData[2048]; // ara
 uint8_t ReceivedDataFlag = 0; // Flaga informujaca o odebraniu danych
-const char *letter = "**ETIANMSURWDKGOHVF?L?PJBXCYZQ??";//zeby tlumaczyc morsa
+const char *letter = "* ETIANMSURWDKGOHVF?L?PJBXCYZQ??";//zeby tlumaczyc morsa
 char temp[40];// temporary for sending morse
 
 
@@ -282,11 +283,9 @@ void tomorse(char letter1,uint8_t  receive[40]){
 	else if(letter1=='z'){
 		sprintf(receive, "--..");
 	}
-
-
-
-
-
+	else if(letter1==' '){
+		sprintf(receive," ");
+	}
 
 }
 
@@ -300,7 +299,7 @@ void tomorse(char letter1,uint8_t  receive[40]){
 
 
 
-
+char* morses="";
 uint8_t x=0x00;uint8_t y=0x00;int b=0;
 int reset=0;//reset ekranu, jesli wyswietla sie wynik
 int space=0;//czy poprzednim znakiem by³a spacja
@@ -311,8 +310,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
    	{
     	if(HAL_GPIO_ReadPin(GPIOB,Joy_Button_Pin)== 1)
     	{
+
     		 if(stop==1)
     		{
+    			 MessageLength = sprintf(DataToSend, "%s to: %s\n\r",morses,wyraz );
+    			 CDC_Transmit_FS(DataToSend, MessageLength);
+    			 morses="";
+
         		results= concat("wynik to \"",wyraz);
     			results= concat(results,"\" ");
     			write(results);
@@ -334,6 +338,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 					if(val>4)
     					{
+						morses=concat(morses,results);
+						morses=concat(morses," ");
+
+
     					frommorse(results,results);
     					wyraz=concat(wyraz,results);
     					results="";
@@ -486,6 +494,62 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    	if(ReceivedDataFlag==1){
+			  lcd_command(0x40 | 0x00);   //Zerowanie Y
+  			    lcd_command(0x80 | 0x00);   //Zerowanie X
+				lcd_data(morse, sizeof(morse));
+
+
+    		ReceivedDataFlag=0;
+
+    		MessageLength = sprintf(DataToSend, "odebrano : %s\n\r",ReceivedData );
+    		    			 CDC_Transmit_FS(DataToSend, MessageLength);
+    		    			 write(ReceivedData);
+    		    			 char *re=" to ";
+    		    			 char temp[40];char*tem2="";char tempi[40];int k=-1;
+    		    			 for(int i=0;i<40;i++)
+    		    			 	 {
+
+									 if(ReceivedData[0]=='-'||ReceivedData[0]=='.')
+										 {
+										 if(ReceivedData[i]!=' ' && i<39)
+										 	 { k++;
+											 tempi[k]=ReceivedData[i];
+										 	 }
+										 else
+											 {k=-1;
+											 //write(tempi);
+											// HAL_Delay(1000);
+											 frommorse(tempi,&temp);
+											 for(int j=0;j<40;j++)tempi[j]='\0';
+											 re=concat(re,temp);
+											 for(int j=0;j<40;j++)temp[40]='\0';
+											 }
+
+
+
+										 }
+									 else
+										 {
+										 tomorse(ReceivedData[i],&temp);
+
+										 re=concat(re,temp);
+										 re=concat(re," ");
+										 }
+
+    		    			 	 }
+    		    			 write(re);
+
+
+
+
+    		    			 for(uint8_t i=0;i<40;i++){
+    		    				 DataToSend[i]=0;
+    		    			 }
+
+
+
+    	}
     }
   /* USER CODE END 3 */
 }

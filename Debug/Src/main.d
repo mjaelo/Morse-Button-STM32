@@ -34,6 +34,13 @@ Src/main.o: ../Src/main.c D:/studia/sem4/ptm2/wysw2/Inc/main.h \
  D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h \
  D:/studia/sem4/ptm2/wysw2/Inc/usbd_conf.h \
  D:/studia/sem4/ptm2/wysw2/Inc/main.h \
+ D:/studia/sem4/ptm2/wysw2/Inc/usbd_cdc_if.h \
+ D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h \
+ D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
+ D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h \
+ D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
+ D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
+ D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h \
  D:/studia/sem4/ptm2/wysw2/Inc/logo.h
 
 D:/studia/sem4/ptm2/wysw2/Inc/main.h:
@@ -107,5 +114,19 @@ D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_
 D:/studia/sem4/ptm2/wysw2/Inc/usbd_conf.h:
 
 D:/studia/sem4/ptm2/wysw2/Inc/main.h:
+
+D:/studia/sem4/ptm2/wysw2/Inc/usbd_cdc_if.h:
+
+D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Inc/usbd_cdc.h:
+
+D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:
+
+D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h:
+
+D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h:
+
+D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:
+
+D:/studia/sem4/ptm2/wysw2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h:
 
 D:/studia/sem4/ptm2/wysw2/Inc/logo.h:

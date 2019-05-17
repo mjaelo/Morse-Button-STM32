@@ -262,10 +262,24 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
   */
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
-  /* USER CODE BEGIN 6 */
-  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
-  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
-  return (USBD_OK);
+	/* USER CODE BEGIN 6 */
+	  USBD_CDC_SetRxBuffer(&hUsbDeviceFS,&Buf[0]);
+	  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+
+	  // Zmienne zadeklarowane w pliku main.c
+	  extern uint8_t ReceivedData[40]; // Tablica przechowujaca odebrane dane
+	  extern uint8_t ReceivedDataFlag; // Flaga informujaca o odebraniu danych
+
+	  // Wyczyszczenie tablicy odebranych danych
+	  uint8_t iter;
+	  for(iter = 0; iter<40; ++iter){
+		  ReceivedData[iter] = 0;
+	  }
+
+	  strlcpy(ReceivedData, Buf, (*Len) + 1); // Przekopiowanie danych do naszej tablicy
+	  ReceivedDataFlag = 1; // Ustawienie flagi odebrania danych
+
+	  return (USBD_OK);
   /* USER CODE END 6 */
 }
 
