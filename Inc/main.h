@@ -66,6 +66,8 @@ void Error_Handler(void);
 #define RST_GPIO_Port GPIOC
 #define DC_Pin GPIO_PIN_11
 #define DC_GPIO_Port GPIOD
+#define Sound_Pin GPIO_PIN_15
+#define Sound_GPIO_Port GPIOD
 #define Joy_Button_Pin GPIO_PIN_6
 #define Joy_Button_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

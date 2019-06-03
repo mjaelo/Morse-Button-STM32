@@ -24,10 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "usbd_cdc_if.h"
-#include <stdlib.h>
-#include <string.h>
-#include "logo.h"
+#include <morse.h>
 
 /* USER CODE END Includes */
 
@@ -51,13 +48,11 @@
 /* Private variables ---------------------------------------------------------*/
 SPI_HandleTypeDef hspi1;
 
+TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 
 /* USER CODE BEGIN PV */
-uint8_t stop = 0;
-uint16_t val = 0;
-char *results;// zapisujemy w tym morsowe litery
-char *wyraz;
+
 
 /* USER CODE END PV */
 
@@ -66,355 +61,10 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM4_Init(void);
+static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
-void spi_send(uint8_t byte) {
-    HAL_SPI_Transmit(&hspi1, &byte, 1, HAL_MAX_DELAY);
-    //HAL_SPI_Transmit(&hspi1, &byte, 1, HAL_MAX_DELAY);
-}
 
-void lcd_reset() {
-    HAL_GPIO_WritePin(RST_GPIO_Port, RST_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(RST_GPIO_Port, RST_Pin, GPIO_PIN_SET);
-}
-
-void lcd_command(uint8_t cmd) {
-    HAL_GPIO_WritePin(DC_GPIO_Port, DC_Pin, GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(CE_GPIO_Port, CE_Pin, GPIO_PIN_RESET);
-    spi_send(cmd);
-    HAL_GPIO_WritePin(CE_GPIO_Port, CE_Pin, GPIO_PIN_SET);
-}
-
-void lcd_data(const uint8_t *data, int size) {
-    lcd_command(0x40 | 0x00);   //Zerowanie Y
-    lcd_command(0x80 | 0x00);   //Zerowanie X
-    HAL_GPIO_WritePin(DC_GPIO_Port, DC_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(CE_GPIO_Port, CE_Pin, GPIO_PIN_RESET);
-    for (int i = 0; i < size; i++)
-    {   spi_send(data[i]);    }
-    HAL_GPIO_WritePin(CE_GPIO_Port, CE_Pin, GPIO_PIN_SET);
-}
-void lcd_znak(const uint8_t *data, int size) {
-
-    HAL_GPIO_WritePin(DC_GPIO_Port, DC_Pin, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(CE_GPIO_Port, CE_Pin, GPIO_PIN_RESET);
-    for (int i = 0; i < size; i++) {
-        spi_send(data[i]);
-    }
-    HAL_GPIO_WritePin(CE_GPIO_Port, CE_Pin, GPIO_PIN_SET);
-}
-
-
-void write(char st[])
- {
-  uint16_t n = strlen(st);
-  uint16_t x = 0;
-     while(x<n)
-     {
-    	 uint8_t ch[6];
-    	 for(int i = 0; i < 6; i++)
-    	 {
-    		 ch[i]= ASCII[ st[x]-0x20][i];
-    	 }
-    	 uint16_t s =sizeof(ch);
-    	 lcd_znak(ch, s );
-    	 x++;
-     }
- }
-
-
-char* concat(const char *s1, const char *s2)
-{
-    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
-    // in real code you would check for errors in malloc here
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
-
-
-
-
-
-
-
-
-
-//Sending
-uint8_t DataToSend[40]; // array for date to send
-uint8_t MessageCounter = 0; // how many messanges we send
-uint8_t MessageLength = 0; //lenght of message
-//Reciving
-uint8_t ReceivedData[2048]; // ara
-uint8_t ReceivedDataFlag = 0; // Flaga informujaca o odebraniu danych
-const char *letter = "* ETIANMSURWDKGOHVF?L?PJBXCYZQ??";//zeby tlumaczyc morsa
-char temp[40];// temporary for sending morse
-
-
-void frommorse(uint8_t receive[40],uint8_t send[40]){
-	uint8_t let=1;
- for(int i=0;i<4;i++){
-
-	 if(receive[i]==46){
-		 let=let*2;
-	 }
-
-	 else if(receive[i]==45){
-		 let=let*2+1;
-	 }
-
-	 else {
-		 break;
-	 }}
- char temp[2];
- temp[0]=letter[let];
- temp[1]='\0';
- strcpy(send, temp);
-
- }
-
-void tomorse(char letter1,uint8_t  receive[40]){
-	//char morse[40];
-	memset(receive, 0, 40);
-
-	if(letter1=='a'){
-		sprintf(receive, ".-");
-		}
-
-	else if(letter1=='b'){
-		sprintf(receive, "-...");
-	}
-
-
-	else if(letter1=='c'){
-		sprintf(receive, "-.-.");
-	}
-
-	else if(letter1=='d'){
-		sprintf(receive, "-..");
-	}
-
-	else if(letter1=='e'){
-		sprintf(receive, ".");
-	}
-
-	else if(letter1=='f'){
-		sprintf(receive, "..-.");
-	}
-
-	else if(letter1=='g'){
-		sprintf(receive, "--.");
-	}
-
-	else if(letter1=='h'){
-		sprintf(receive, "....");
-	}
-
-	else if(letter1=='i'){
-		sprintf(receive, "..");
-	}
-
-
-
-	else if(letter1=='j'){
-		sprintf(receive, ".---");
-	}
-
-	else if(letter1=='k'){
-		sprintf(receive, "-.-");
-	}
-
-	else if(letter1=='l'){
-		sprintf(receive, ".-..");
-	}
-
-	else if(letter1=='m'){
-		sprintf(receive, "--");
-	}
-
-	else if(letter1=='n'){
-		sprintf(receive, "-.");
-	}
-
-	else if(letter1=='o'){
-		sprintf(receive, "---");
-	}
-
-	else if(letter1=='p'){
-		sprintf(receive, ".--.");
-	}
-
-	else if(letter1=='q'){
-		sprintf(receive, "--.-");
-	}
-
-	else if(letter1=='r'){
-		sprintf(receive, ".-.");
-	}
-
-	else if(letter1=='s'){
-		sprintf(receive, "...");
-	}
-
-	else if(letter1=='t'){
-		sprintf(receive, "-");
-	}
-
-	else if(letter1=='u'){
-		sprintf(receive, "..-");
-	}
-
-	else if(letter1=='v'){
-		sprintf(receive, "...-");
-	}
-
-	else if(letter1=='w'){
-		sprintf(receive, ".--");
-	}
-
-	else if(letter1=='x'){
-		sprintf(receive, "-..-");
-	}
-
-	else if(letter1=='y'){
-		sprintf(receive, "-.--");
-	}
-
-	else if(letter1=='z'){
-		sprintf(receive, "--..");
-	}
-	else if(letter1==' '){
-		sprintf(receive," ");
-	}
-
-}
-
-
-
-
-
-
-
-
-
-
-
-char* morses="";
-uint8_t x=0x00;uint8_t y=0x00;int b=0;
-int reset=0;//reset ekranu, jesli wyswietla sie wynik
-int space=0;//czy poprzednim znakiem by³a spacja
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
-   	if(htim->Instance == TIM4)
-   	{
-    	if(HAL_GPIO_ReadPin(GPIOB,Joy_Button_Pin)== 1)
-    	{
-
-    		 if(stop==1)
-    		{
-    			 MessageLength = sprintf(DataToSend, "%s to: %s\n\r",morses,wyraz );
-    			 CDC_Transmit_FS(DataToSend, MessageLength);
-    			 morses="";
-
-        		results= concat("wynik to \"",wyraz);
-    			results= concat(results,"\" ");
-    			write(results);
-    			results="";
-    			wyraz="";
-    			reset=1;
-    			stop =0;
-    		}
-    		else
-    		{
-
-    			if(val > 0)
-    			{
-						b++;
-					if(b>=14)    	{y+=1;b=0;x=0x00;}
-    			else x+=6;
-
-				if(val<4)space=0;
-
-					if(val>4)
-    					{
-						morses=concat(morses,results);
-						morses=concat(morses," ");
-
-
-    					frommorse(results,results);
-    					wyraz=concat(wyraz,results);
-    					results="";
-    					write(" ");
-
-    					if(space==1)
-						{wyraz=concat(wyraz," ");space=0;}
-						else
-						space =1;
-
-    					if(val>8)
-    					{stop=1;}
-
-    					//... . -. -.. -. ..- -.. . ...
-    					//...---...
-    					}
-
-    				else if(val>2)
-    				{
-    					write("-");
-    					results =  concat(results,"-");
-    				}
-    				else
-    				{
-    					write(".");
-    					results =  concat(results,".");
-    				}
-    				val=0;
-    			}
-
-    		}
-    	}
-    	else
-    	{
-    		val++;
-    		if(reset==1)
-    		    		{
-    		    			x=0x00;y=0x00;
-    						if(val>0)
-    						{
-    							lcd_data(morse, sizeof(morse));
-    							reset=0;
-    							val=0;
-    						}
-    		    		}
-    		    		else
-    		if(val > 0)
-			{
-    		if(val>12)val=0;
-    		else if(val>8)
-				{
-    			write("X");
-				}
-			else if(val>4)
-				{
-				write(" ");
-				}
-				else if(val>2)
-				{
-					write("-");
-				}
-				else
-				{
-					write(".");
-				}
-
-			}
-    		lcd_command(0x40 | y);   //Zerowanie Y
-    		lcd_command(0x80 | x);   //Zerowanie X
-
-    	}
-   	}
-}
 
 /* USER CODE END PFP */
 
@@ -433,6 +83,7 @@ int main(void)
 
 
   /* USER CODE END 1 */
+  
 
   /* MCU Configuration--------------------------------------------------------*/
 
@@ -455,102 +106,21 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM4_Init();
   MX_USB_DEVICE_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-
-  HAL_TIM_Base_Start_IT(&htim4);
-
-   HAL_GPIO_WritePin(BL_GPIO_Port, BL_Pin, GPIO_PIN_SET);
-
-    lcd_reset();
-
-   /* lcd_command(0x20 | 0x01);  //Komendy rozszerzone
-    lcd_command(0x10 | 0x04);  //Bias System
-    lcd_command(0x80 | 0x32);  //Ustawienie kontrastu
-    lcd_command(0x20 | 0x00);  //Komendy zwykle
-    lcd_command(0x08 | 0x04);  //Konfiguracja wyswietlacza
-*/
-    lcd_command(0x21);
-    lcd_command(0x14);
-    lcd_command(0x80 | 0x2f); //Ustawienie kontrastu
-    lcd_command(0x20);
-    lcd_command(0x0c);
-
-    for(int j = 0; j < 504; j++) lcd_znak(0, 1);//reset ekranu
-    lcd_command(0x40 | 0x00);   //Zerowanie Y
-    lcd_command(0x80 | 0x00);   //Zerowanie X
-    lcd_data(morse, sizeof(morse));
-    lcd_command(0x40 | 0x00);   //Zerowanie Y
-    lcd_command(0x80 | 0x00);   //Zerowanie X
-
-
+    setup();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
     while (1) {
-
-
+        loop();
+    }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    	if(ReceivedDataFlag==1){
-			  lcd_command(0x40 | 0x00);   //Zerowanie Y
-  			    lcd_command(0x80 | 0x00);   //Zerowanie X
-				lcd_data(morse, sizeof(morse));
 
-
-    		ReceivedDataFlag=0;
-
-    		MessageLength = sprintf(DataToSend, "odebrano : %s\n\r",ReceivedData );
-    		    			 CDC_Transmit_FS(DataToSend, MessageLength);
-    		    			 write(ReceivedData);
-    		    			 char *re=" to ";
-    		    			 char temp[40];char*tem2="";char tempi[40];int k=-1;
-    		    			 for(int i=0;i<40;i++)
-    		    			 	 {
-
-									 if(ReceivedData[0]=='-'||ReceivedData[0]=='.')
-										 {
-										 if(ReceivedData[i]!=' ' && i<39)
-										 	 { k++;
-											 tempi[k]=ReceivedData[i];
-										 	 }
-										 else
-											 {k=-1;
-											 //write(tempi);
-											// HAL_Delay(1000);
-											 frommorse(tempi,&temp);
-											 for(int j=0;j<40;j++)tempi[j]='\0';
-											 re=concat(re,temp);
-											 for(int j=0;j<40;j++)temp[40]='\0';
-											 }
-
-
-
-										 }
-									 else
-										 {
-										 tomorse(ReceivedData[i],&temp);
-
-										 re=concat(re,temp);
-										 re=concat(re," ");
-										 }
-
-    		    			 	 }
-    		    			 write(re);
-
-
-
-
-    		    			 for(uint8_t i=0;i<40;i++){
-    		    				 DataToSend[i]=0;
-    		    			 }
-
-
-
-    	}
-    }
   /* USER CODE END 3 */
 }
 
@@ -635,6 +205,51 @@ static void MX_SPI1_Init(void)
 }
 
 /**
+  * @brief TIM3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM3_Init(void)
+{
+
+  /* USER CODE BEGIN TIM3_Init 0 */
+
+  /* USER CODE END TIM3_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM3_Init 1 */
+
+  /* USER CODE END TIM3_Init 1 */
+  htim3.Instance = TIM3;
+  htim3.Init.Prescaler = 84-1;
+  htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim3.Init.Period = 1000-1;
+  htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim3.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim3, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM3_Init 2 */
+
+  /* USER CODE END TIM3_Init 2 */
+
+}
+
+/**
   * @brief TIM4 Initialization Function
   * @param None
   * @retval None
@@ -703,8 +318,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, CE_Pin|RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, DC_Pin|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
-                          |GPIO_PIN_15, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, DC_Pin|Sound_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : BL_Pin */
   GPIO_InitStruct.Pin = BL_Pin;
@@ -720,10 +334,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : DC_Pin PD12 PD13 PD14 
-                           PD15 */
-  GPIO_InitStruct.Pin = DC_Pin|GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14 
-                          |GPIO_PIN_15;
+  /*Configure GPIO pins : DC_Pin Sound_Pin */
+  GPIO_InitStruct.Pin = DC_Pin|Sound_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
