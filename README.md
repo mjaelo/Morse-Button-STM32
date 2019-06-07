@@ -1,2 +1,6 @@
-# Morse-Button-STM32
-is a program for STM32. Its main fuctionality is to translate morse code to latin alphabet. It can reseive data from computer by USB port and directly from user with a button.
+# 2019_MorseButton
+test
+# Credits
+Juliusz Horowski  
+Marcin Jasiński  
+The project was conducted during the Microprocessor Lab course held by the Institute of Control and Information Engineering, Poznan University of Technology. Supervisor: Tomasz Mańkowski
